@@ -8,40 +8,23 @@ body { font-family: Arial; }
 li { padding:5px }
 </style>
 </head>
+
 <body>
 
 <h2>Chatroom</h2>
 
+<label>Username:</label>
+<input id="username" placeholder="Enter username">
+
 <ul id="messages"></ul>
 
 <form id="form">
-<input id="input" autocomplete="off" />
+<input id="input" autocomplete="off" placeholder="Message">
 <button>Send</button>
 </form>
 
 <script src="/socket.io/socket.io.js"></script>
-
-<script>
-const socket = io();
-
-const form = document.getElementById('form');
-const input = document.getElementById('input');
-const messages = document.getElementById('messages');
-
-form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (input.value) {
-        socket.emit('chat message', input.value);
-        input.value = '';
-    }
-});
-
-socket.on('chat message', function(msg) {
-    const item = document.createElement('li');
-    item.textContent = msg;
-    messages.appendChild(item);
-});
-</script>
+<script src="client.js"></script>
 
 </body>
 </html>
