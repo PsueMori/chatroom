@@ -7,30 +7,47 @@ const io = new Server(http);
 
 app.use(express.static("public"));
 
+let users = {}; // store connected users
+
 io.on("connection", (socket) => {
   console.log("User connected");
 
-  // store username
+  // when a user sets a username
   socket.on("set username", (username) => {
     socket.username = username;
+    users[socket.id] = username;
+
+    // broadcast user joined
+    io.emit("user joined", username);
+
+    // update user list for everyone
+    io.emit("update users", Object.values(users));
   });
 
+  // handle messages
   socket.on("chat message", (msg) => {
-    const messageData = {
+    io.emit("chat message", {
       user: socket.username || "Anonymous",
       text: msg
-    };
-
-    io.emit("chat message", messageData);
+    });
   });
 
+  // handle disconnect
   socket.on("disconnect", () => {
-    console.log("User disconnected");
+    if (socket.username) {
+      console.log(`${socket.username} disconnected`);
+
+      // broadcast user left
+      io.emit("user left", socket.username);
+
+      // remove from users list
+      delete users[socket.id];
+      io.emit("update users", Object.values(users));
+    }
   });
 });
 
 const PORT = process.env.PORT || 3000;
-
 http.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
