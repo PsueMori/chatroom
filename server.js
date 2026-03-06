@@ -5,15 +5,23 @@ const { Server } = require("socket.io");
 
 const io = new Server(http);
 
-// serve frontend files
 app.use(express.static("public"));
 
-// socket connection
 io.on("connection", (socket) => {
   console.log("User connected");
 
+  // store username
+  socket.on("set username", (username) => {
+    socket.username = username;
+  });
+
   socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
+    const messageData = {
+      user: socket.username || "Anonymous",
+      text: msg
+    };
+
+    io.emit("chat message", messageData);
   });
 
   socket.on("disconnect", () => {
@@ -21,7 +29,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// dynamic port for hosting services
 const PORT = process.env.PORT || 3000;
 
 http.listen(PORT, () => {
