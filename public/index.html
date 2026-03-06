@@ -3,25 +3,33 @@
 <head>
 <title>Global Chatroom</title>
 <style>
-body { font-family: Arial; }
-#messages { list-style: none; padding:0; }
-li { padding:5px }
+body { font-family: Arial; display: flex; height: 100vh; margin:0; }
+#sidebar { width: 200px; background: #f0f0f0; padding: 10px; border-right: 1px solid #ccc; }
+#chat { flex: 1; display: flex; flex-direction: column; }
+#messages { list-style: none; padding: 0; flex: 1; overflow-y: auto; }
+li { padding: 5px; }
+#form { display: flex; }
+#input { flex: 1; padding: 5px; }
 </style>
 </head>
-
 <body>
 
-<h2>Chatroom</h2>
+<div id="sidebar">
+  <h3>Users</h3>
+  <ul id="users"></ul>
+</div>
 
-<label>Username:</label>
-<input id="username" placeholder="Enter username">
+<div id="chat">
+  <label>Username:</label>
+  <input id="username" placeholder="Enter username">
 
-<ul id="messages"></ul>
+  <ul id="messages"></ul>
 
-<form id="form">
-<input id="input" autocomplete="off" placeholder="Message">
-<button>Send</button>
-</form>
+  <form id="form">
+    <input id="input" autocomplete="off" placeholder="Message">
+    <button>Send</button>
+  </form>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="client.js"></script>
