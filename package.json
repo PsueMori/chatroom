@@ -1,7 +1,7 @@
 {
   "name": "chatroom",
   "version": "1.0.0",
-  "description": "Realtime chatroom with usernames, users list, and file uploads",
+  "description": "Realtime chatroom with usernames, users list, file uploads, image preview, and message deletion",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
