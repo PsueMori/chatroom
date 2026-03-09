@@ -55,3 +55,46 @@ socket.on("update users", (users) => {
     usersList.appendChild(li);
   });
 });
+const fileInput = document.getElementById("fileInput");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (input.value) {
+    socket.emit("chat message", input.value);
+    input.value = "";
+  }
+
+  if (fileInput.files.length > 0) {
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    socket.emit("file message", data);
+
+    fileInput.value = "";
+  }
+});
+
+socket.on("file message", (data) => {
+
+  const li = document.createElement("li");
+
+  const link = document.createElement("a");
+  link.href = data.file;
+  link.target = "_blank";
+  link.textContent = data.name;
+
+  li.textContent = data.user + ": ";
+  li.appendChild(link);
+
+  messages.appendChild(li);
+});
