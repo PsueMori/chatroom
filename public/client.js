@@ -7,9 +7,12 @@ const usernameInput = document.getElementById("username");
 const usersList = document.getElementById("users");
 const fileInput = document.getElementById("fileInput");
 
+let currentUser = "";
+
 // send username to server
 usernameInput.addEventListener("change", () => {
-  socket.emit("set username", usernameInput.value);
+  currentUser = usernameInput.value;
+  socket.emit("set username", currentUser);
 });
 
 // send messages and files
@@ -38,51 +41,48 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-// display text messages
-socket.on("chat message", (msg) => {
+// helper to create messages
+function addMessage(msg, isFile = false) {
   const li = document.createElement("li");
   li.id = msg.id;
 
+  // display username
   const text = document.createElement("span");
-  text.textContent = msg.user + ": " + msg.text;
-
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "❌";
-  deleteBtn.style.marginLeft = "10px";
-  deleteBtn.onclick = () => socket.emit("delete message", msg.id);
-
+  text.textContent = msg.user + (isFile ? ": " : ": " + (msg.text || ""));
   li.appendChild(text);
-  li.appendChild(deleteBtn);
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
-});
 
-// display file messages with preview
-socket.on("file message", (data) => {
-  const li = document.createElement("li");
-  li.id = data.id;
-  li.textContent = data.user + ": ";
-
-  if (data.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-    const img = document.createElement("img");
-    img.src = data.file;
-    li.appendChild(img);
-  } else {
-    const link = document.createElement("a");
-    link.href = data.file;
-    link.target = "_blank";
-    link.textContent = data.name;
-    li.appendChild(link);
+  // show delete button only for messages sent by current user
+  if (msg.user === currentUser) {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "❌";
+    deleteBtn.style.marginLeft = "10px";
+    deleteBtn.onclick = () => socket.emit("delete message", msg.id);
+    li.appendChild(deleteBtn);
   }
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "❌";
-  deleteBtn.onclick = () => socket.emit("delete message", data.id);
+  if (isFile) {
+    if (msg.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      const img = document.createElement("img");
+      img.src = msg.file;
+      li.appendChild(img);
+    } else {
+      const link = document.createElement("a");
+      link.href = msg.file;
+      link.target = "_blank";
+      link.textContent = msg.name;
+      li.appendChild(link);
+    }
+  }
 
-  li.appendChild(deleteBtn);
   messages.appendChild(li);
   messages.scrollTop = messages.scrollHeight;
-});
+}
+
+// display text messages
+socket.on("chat message", (msg) => addMessage(msg));
+
+// display file messages
+socket.on("file message", (msg) => addMessage(msg, true));
 
 // delete messages
 socket.on("delete message", (id) => {
