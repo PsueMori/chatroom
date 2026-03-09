@@ -88,13 +88,34 @@ socket.on("file message", (data) => {
 
   const li = document.createElement("li");
 
-  const link = document.createElement("a");
-  link.href = data.file;
-  link.target = "_blank";
-  link.textContent = data.name;
+  const fileUrl = data.file;
+  const fileName = data.name;
 
   li.textContent = data.user + ": ";
-  li.appendChild(link);
+
+  // check if file is an image
+  if (fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+
+    const img = document.createElement("img");
+    img.src = fileUrl;
+    img.style.maxWidth = "200px";
+    img.style.display = "block";
+    img.style.marginTop = "5px";
+
+    li.appendChild(img);
+
+  } else {
+
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.target = "_blank";
+    link.textContent = fileName;
+
+    li.appendChild(link);
+
+  }
 
   messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
+
 });
