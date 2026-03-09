@@ -32,7 +32,9 @@ app.post("/upload", upload.single("file"), (req, res) => {
   });
 });
 
-// socket logic
+// store messages to track owners
+let messagesStore = {};
+
 io.on("connection", (socket) => {
   console.log("User connected");
 
@@ -50,6 +52,7 @@ io.on("connection", (socket) => {
       user: socket.username || "Anonymous",
       text: msg
     };
+    messagesStore[message.id] = message.user;
     io.emit("chat message", message);
   });
 
@@ -60,11 +63,16 @@ io.on("connection", (socket) => {
       file: data.file,
       name: data.name
     };
+    messagesStore[message.id] = message.user;
     io.emit("file message", message);
   });
 
   socket.on("delete message", (id) => {
-    io.emit("delete message", id);
+    // only allow deletion if sender matches
+    if (messagesStore[id] === socket.username) {
+      io.emit("delete message", id);
+      delete messagesStore[id];
+    }
   });
 
   socket.on("disconnect", () => {
